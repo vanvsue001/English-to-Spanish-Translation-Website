@@ -10,6 +10,41 @@ socket.on('send-clients', (message, lang) =>{ //messages from server
 })
 
 
+//const audioCtx = new AudioContext();
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let source;
+
+    socket.on('audio', (data) => {
+        console.log('client got data')
+        audioCtx.decodeAudioData(data,(buffer) => {
+                if (!source) {
+                    source = audioCtx.createBufferSource();
+                    source.buffer = buffer;
+                    source.connect(audioCtx.destination);
+                    source.start();
+                } else {
+                    source.buffer = buffer;
+                }
+            },
+            (err) => {
+                console.error(`Error decoding audio data: ${err}`);
+            }
+        ); 
+    });
+
+    //play
+    var playBtn = document.querySelector('#playBtn');
+    playBtn.addEventListener('click', () => {
+        if (!source) {
+        console.error('No audio data loaded');
+        return;
+        }
+        source.start(0);
+    });
+
+ 
+
+
 var form = document.getElementById('form');
 var input = document.getElementById('input');
 form.addEventListener('submit', function(e) {
@@ -70,6 +105,7 @@ function getLang(){
 //record speech
 var recordBtn = document.querySelector('#recordBtn');
 var stopBtn = document.querySelector('#stopBtn');
+const soundClips = document.querySelector('.sound-clips');
 
 // disable stop button while not recording
 stop.disabled = true;
@@ -85,9 +121,9 @@ if (navigator.mediaDevices.getUserMedia) {
 
     recordBtn.addEventListener('click', function() {
         mediaRecorder.start();
-        //console.log(mediaRecorder.state);
         console.log("recorder started");
         recordBtn.style.background = "red";
+  
   
         stop.disabled = false;
         recordBtn.disabled = true;
@@ -99,41 +135,110 @@ if (navigator.mediaDevices.getUserMedia) {
         //console.log("recorder stopped");
         recordBtn.style.background = "";
         recordBtn.style.color = "";
-        // mediaRecorder.requestData();
-  
+
         stop.disabled = true;
         recordBtn.disabled = false;
-      });
+    });
  
-
     mediaRecorder.onstop = function(e) {
-      //console.log("data available after MediaRecorder.stop() called.");
-      console.log("recorder stopped");
+        console.log("data available after MediaRecorder.stop() called.");
+  
+        const clipName = prompt('Enter a name for your sound clip?','My unnamed clip');
+  
+        const clipContainer = document.createElement('article');
+        const clipLabel = document.createElement('p');
+        const audio = document.createElement('audio');
+        const deleteButton = document.createElement('button');
+  
+        clipContainer.classList.add('clip');
+        audio.setAttribute('controls', '');
+        deleteButton.textContent = 'Delete';
+        deleteButton.className = 'delete';
+  
+        if(clipName === null) {
+          clipLabel.textContent = 'My unnamed clip';
+        } else {
+          clipLabel.textContent = clipName;
+        }
+  
+        clipContainer.appendChild(audio);
+        clipContainer.appendChild(clipLabel);
+        clipContainer.appendChild(deleteButton);
+        soundClips.appendChild(clipContainer);
+  
+        audio.controls = true;
+        const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+        chunks = [];
+        const audioURL = window.URL.createObjectURL(blob);
+        audio.src = audioURL;
+        console.log("recorder stopped");
+  
+        deleteButton.onclick = function(e) {
+          e.target.closest(".clip").remove();
+        }
+  
+        clipLabel.onclick = function() {
+          const existingName = clipLabel.textContent;
+          const newClipName = prompt('Enter a new name for your sound clip?');
+          if(newClipName === null) {
+            clipLabel.textContent = existingName;
+          } else {
+            clipLabel.textContent = newClipName;
+          }
+        }
 
-      const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
-      
-      chunks = [];
-      const audioURL = window.URL.createObjectURL(blob);
-      console.log(blob)
-      
-      //console.log("recorder stopped");
-      
 
-    }
+
+
+        // //play
+        // const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // let source;
+
+        // var playBtn = document.querySelector('#playBtn');
+        // playBtn.addEventListener('click', () => {
+        //     getData();
+        //     source.start(0);
+        //     playBtn.setAttribute("disabled", "disabled");
+        // });
+
+        // function getData() {
+        //     source = audioCtx.createBufferSource();
+        //     const request = new XMLHttpRequest();
+        
+        //     request.open("GET", audioURL, true);
+        
+        //     request.responseType = "arraybuffer";
+        
+        //     request.onload = () => {
+        //     const audioData = request.response;
+        
+        //     audioCtx.decodeAudioData(
+        //         audioData,
+        //         (buffer) => {
+        //         source.buffer = buffer;
+        
+        //         source.connect(audioCtx.destination);
+        //         source.loop = true;
+        //         },
+        
+        //         (err) => console.error(`Error with decoding audio data: ${err.err}`)
+        //     );
+        //     };
+        
+        //     request.send();
+        // }
+
+       
+      }
+  
 
     mediaRecorder.ondataavailable = function(e) {
       chunks.push(e.data);
-      console.log('chunks: ');
-      console.log(chunks);
+      console.log('data sent to server: ');
+      console.log(e.data);
 
-      //socket.emit('send-blob', 'hola from js client');
-      socket.emit('send-blob', chunks);
-      
-      socket.on('send-blob', function(chunks){
-        var bufView = new Int32Array(chunks);
-        console.log('chuncks: ')
-        console.log(chunks)
-      });
+      socket.emit('audio', e.data);
+
     }
   }
 
