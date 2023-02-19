@@ -41,13 +41,6 @@ function displayMessage(msg, color, lang){
     item.textContent = msg;
     messages.appendChild(item);
     item.addEventListener('click', speak);
-    const regex = /^command\s/
-    if(msg.match(regex)){
-     item.style.color = 'red';
-    }
-    else{
-        item.style.color = 'black';
-    }
     window.scrollTo(0, document.body.scrollHeight);
 }
 
@@ -55,8 +48,8 @@ function displayMessage(msg, color, lang){
 //speak button
 var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
 
-var recordBtn = document.querySelector('#recordBtn');
-recordBtn.addEventListener('click', textSpeech);
+var speakBtn = document.querySelector('#speakBtn');
+speakBtn.addEventListener('click', textSpeech);
 
 //get language
 var language= 'en-US' //default
@@ -64,19 +57,96 @@ function getLang(){
     const langCheckbox = document.querySelector('#lang');
     langCheckbox.addEventListener('change', (event) => {
         if (event.target.checked) {
-            // The checkbox is checked
             language = 'es-MX'
-            //console.log('Spanish');
         } 
         else {
-            // The checkbox is not checked
             language = 'en-US'
-            //console.log('English');
         }
     });
     return language
 }
+
+
 //record speech
+var recordBtn = document.querySelector('#recordBtn');
+var stopBtn = document.querySelector('#stopBtn');
+
+// disable stop button while not recording
+stop.disabled = true;
+
+if (navigator.mediaDevices.getUserMedia) {
+  console.log('getUserMedia supported.');
+
+  const constraints = { audio: true };
+  let chunks = [];
+
+  let onSuccess = function(stream) {
+    const mediaRecorder = new MediaRecorder(stream);
+
+    recordBtn.addEventListener('click', function() {
+        mediaRecorder.start();
+        //console.log(mediaRecorder.state);
+        console.log("recorder started");
+        recordBtn.style.background = "red";
+  
+        stop.disabled = false;
+        recordBtn.disabled = true;
+    });
+    
+    stopBtn.addEventListener('click', function() {
+        mediaRecorder.stop();
+        //console.log(mediaRecorder.state);
+        //console.log("recorder stopped");
+        recordBtn.style.background = "";
+        recordBtn.style.color = "";
+        // mediaRecorder.requestData();
+  
+        stop.disabled = true;
+        recordBtn.disabled = false;
+      });
+ 
+
+    mediaRecorder.onstop = function(e) {
+      //console.log("data available after MediaRecorder.stop() called.");
+      console.log("recorder stopped");
+
+      const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+      
+      chunks = [];
+      const audioURL = window.URL.createObjectURL(blob);
+      console.log(blob)
+      
+      //console.log("recorder stopped");
+      
+
+    }
+
+    mediaRecorder.ondataavailable = function(e) {
+      chunks.push(e.data);
+      console.log('chunks: ');
+      console.log(chunks);
+
+      //socket.emit('send-blob', 'hola from js client');
+      socket.emit('send-blob', chunks);
+      
+      socket.on('send-blob', function(chunks){
+        var bufView = new Int32Array(chunks);
+        console.log('chuncks: ')
+        console.log(chunks)
+      });
+    }
+  }
+
+  let onError = function(err) {
+    console.log('The following error occured: ' + err);
+  }
+
+  navigator.mediaDevices.getUserMedia(constraints).then(onSuccess, onError);
+
+} 
+else {
+   console.log('getUserMedia not supported on your browser!');
+}
 
 
 
