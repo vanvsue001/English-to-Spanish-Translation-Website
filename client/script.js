@@ -77,6 +77,10 @@ function getLang(){
     return language
 }
 //record speech
+<<<<<<< HEAD
+=======
+
+>>>>>>> ab1155c1e388d3ee5ca8c022939a9ee73f8629e0
 
 
 
