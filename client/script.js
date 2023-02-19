@@ -9,42 +9,6 @@ socket.on('send-clients', (message, lang) =>{ //messages from server
     displayMessage(message,'gray-200', lang)
 })
 
-
-//const audioCtx = new AudioContext();
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-let source;
-
-    socket.on('audio', (data) => {
-        console.log('client got data')
-        audioCtx.decodeAudioData(data,(buffer) => {
-                if (!source) {
-                    source = audioCtx.createBufferSource();
-                    source.buffer = buffer;
-                    source.connect(audioCtx.destination);
-                    source.start();
-                } else {
-                    source.buffer = buffer;
-                }
-            },
-            (err) => {
-                console.error(`Error decoding audio data: ${err}`);
-            }
-        ); 
-    });
-
-    //play
-    var playBtn = document.querySelector('#playBtn');
-    playBtn.addEventListener('click', () => {
-        if (!source) {
-        console.error('No audio data loaded');
-        return;
-        }
-        source.start(0);
-    });
-
- 
-
-
 var form = document.getElementById('form');
 var input = document.getElementById('input');
 form.addEventListener('submit', function(e) {
@@ -131,8 +95,6 @@ if (navigator.mediaDevices.getUserMedia) {
     
     stopBtn.addEventListener('click', function() {
         mediaRecorder.stop();
-        //console.log(mediaRecorder.state);
-        //console.log("recorder stopped");
         recordBtn.style.background = "";
         recordBtn.style.color = "";
 
@@ -168,6 +130,8 @@ if (navigator.mediaDevices.getUserMedia) {
   
         audio.controls = true;
         const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+        console.log(blob)
+        socket.emit('audio', blob);
         chunks = [];
         const audioURL = window.URL.createObjectURL(blob);
         audio.src = audioURL;
@@ -187,58 +151,31 @@ if (navigator.mediaDevices.getUserMedia) {
           }
         }
 
+        //play
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let source;
 
+        var playBtn = document.querySelector('#playBtn');
 
+        var audio2 = document.createElement("audio");
 
-        // //play
-        // const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        // let source;
-
-        // var playBtn = document.querySelector('#playBtn');
-        // playBtn.addEventListener('click', () => {
-        //     getData();
-        //     source.start(0);
-        //     playBtn.setAttribute("disabled", "disabled");
-        // });
-
-        // function getData() {
-        //     source = audioCtx.createBufferSource();
-        //     const request = new XMLHttpRequest();
-        
-        //     request.open("GET", audioURL, true);
-        
-        //     request.responseType = "arraybuffer";
-        
-        //     request.onload = () => {
-        //     const audioData = request.response;
-        
-        //     audioCtx.decodeAudioData(
-        //         audioData,
-        //         (buffer) => {
-        //         source.buffer = buffer;
-        
-        //         source.connect(audioCtx.destination);
-        //         source.loop = true;
-        //         },
-        
-        //         (err) => console.error(`Error with decoding audio data: ${err.err}`)
-        //     );
-        //     };
-        
-        //     request.send();
-        // }
-
+        socket.on("audio", function (arrayBuffer) {
+            var blob = new Blob([arrayBuffer], { type: "audio/ogg; codecs=opus" });
+            console.log(blob);
+            playBtn.addEventListener("click", function () {
+                // Create a new audio element and set the source to the Blob URL    
+                audio2.src = window.URL.createObjectURL(blob);
+                audio2.play();
+            });
+        });
        
       }
   
 
-    mediaRecorder.ondataavailable = function(e) {
-      chunks.push(e.data);
+    mediaRecorder.ondataavailable = function(event) {
+      chunks.push(event.data);
       console.log('data sent to server: ');
-      console.log(e.data);
-
-      socket.emit('audio', e.data);
-
+      console.log(event.data);
     }
   }
 
