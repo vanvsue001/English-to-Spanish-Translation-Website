@@ -77,10 +77,7 @@ function getLang(){
     return language
 }
 //record speech
-<<<<<<< HEAD
-=======
 
->>>>>>> ab1155c1e388d3ee5ca8c022939a9ee73f8629e0
 
 
 
@@ -117,8 +114,6 @@ function textSpeech(){
 }
 
 //speak
-// var texts = document.querySelectorAll('ul > li');
-// texts.forEach(text => { text.addEventListener('click', speak => {console.log('hi')})})
 var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
 const synth = window.speechSynthesis;
 
