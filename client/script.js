@@ -77,31 +77,6 @@ function getLang(){
     return language
 }
 //record speech
-const mediaStreamConstraints = {audio: true, video: false}; 
-navigator.mediaDevices.getUserMedia( MediaStreamConstraints )
-     .then( MediaStream => {
-        // Code that uses the MediaStream
-     }).catch( error => {
-        // Code to handle the error
-        console.log(error)
-});
-
-async function accessMic() {
-    const videoElem = document.getElementById( 'video');
-    let stream = null;
-    try{
-        stream = await navigator.mediaDevices.getUserMedia( 
-                MediaStreamConstraints );
-  
-        //adding the received stream to the source of the video element
-        videoElem.srcObject = stream;
-      
-        videoElem.autoplay = true;
-    }catch(err) {
-        //code to handle the error
-        console.log(error)
-    }
-}
 
 
 
