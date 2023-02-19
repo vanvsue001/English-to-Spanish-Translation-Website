@@ -39,7 +39,20 @@ function displayMessage(msg, color, lang){
     item.setAttribute('lang', lang)
     item.textContent = msg;
     messages.appendChild(item);
-    item.addEventListener('click', speak);
+    //item.addEventListener('click', speak);
+    //var playBtn = document.querySelector('#playBtn');
+        
+    var audio2 = document.createElement("audio");
+
+    socket.on("audio", function (arrayBuffer) {
+        var blob = new Blob([arrayBuffer], { type: "audio/ogg; codecs=opus" });
+        console.log(blob);
+        item.addEventListener("click", function () {
+            // Create a new audio element and set the source to the Blob URL    
+            audio2.src = window.URL.createObjectURL(blob);
+            audio2.play();
+        });
+    });
     window.scrollTo(0, document.body.scrollHeight);
 }
 
@@ -155,27 +168,25 @@ function speakAndRecord(){
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 let source;
         
-                var playBtn = document.querySelector('#playBtn');
+                // var playBtn = document.querySelector('#playBtn');
         
-                var audio2 = document.createElement("audio");
+                // var audio2 = document.createElement("audio");
         
-                socket.on("audio", function (arrayBuffer) {
-                    var blob = new Blob([arrayBuffer], { type: "audio/ogg; codecs=opus" });
-                    console.log(blob);
-                    playBtn.addEventListener("click", function () {
-                        // Create a new audio element and set the source to the Blob URL    
-                        audio2.src = window.URL.createObjectURL(blob);
-                        audio2.play();
-                    });
-                });
+                // socket.on("audio", function (arrayBuffer) {
+                //     var blob = new Blob([arrayBuffer], { type: "audio/ogg; codecs=opus" });
+                //     console.log(blob);
+                //     playBtn.addEventListener("click", function () {
+                //         // Create a new audio element and set the source to the Blob URL    
+                //         audio2.src = window.URL.createObjectURL(blob);
+                //         audio2.play();
+                //     });
+                // });
                
               }
           
         
             mediaRecorder.ondataavailable = function(event) {
               chunks.push(event.data);
-              console.log('data sent to server: ');
-              console.log(event.data);
             }
         }
         let onError = function(err) {
@@ -298,6 +309,8 @@ if (navigator.mediaDevices.getUserMedia) {
         var playBtn = document.querySelector('#playBtn');
 
         var audio2 = document.createElement("audio");
+
+        item.appendChild(audio2); //keep multiple audios
 
         socket.on("audio", function (arrayBuffer) {
             var blob = new Blob([arrayBuffer], { type: "audio/ogg; codecs=opus" });
