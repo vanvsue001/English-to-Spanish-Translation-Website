@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Babel Fish</title>
+    <link
+    rel="shortcut icon"
+    href="https://raw.githubusercontent.com/vanvsue001/imageFavicon/main/fish_favicon.png"
+    type="image/x-icon"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="px-10 flex justify-center">
+        <div class="md:w-3/4 text-center">
+            <div class="flex">
+                <h1 class="text-left text-[#ff4500] font-bold text-3xl">🐟🐠</h1>
+                <h1 class="pl-4 mb-2 text-left text-[#ff4500] font-bold text-3xl">Babel Fish </h1>
+            </div>
+         
+            <div class="outline outline-2 outline-gray-300 rounded mt-5 p-5">
+                <div class="text-end text-sm">
+                    <label for="lang" class="inline-flex items-center p-1 cursor-pointer dark:bg-gray-300 dark:text-gray-800 rounded">
+                        <input id="lang" type="checkbox" class="hidden peer">
+                        <span class="px-4 py-2 rounded dark:bg-[#ff4500] peer-checked:bg-gray-300">English</span>
+                        <span class="px-4 py-2 rounded dark:bg-gray-300 peer-checked:bg-cyan-400 ">Spanish</span>
+                    </label>
+                </div>  
+
+                <h1 class="pl-2 text-left text-[#ff4500] text-3xl font-bold">Messages</h1>
+                <h2 id="connection"  class="pl-2 py-2 text-left text-xs"></h2>
+                    
+                <ul id="messages"></ul>
+                    <input 
+                        class="
+                            font-bold 
+                            text-left 
+                            w-full 
+                            p-2 
+                            bg-gray-200 
+                            rounded
+                        "
+                        id="input" 
+                        autocomplete="off" 
+                    />
+               
+                <div class="flex items-center justify-center my-2">
+                    <div class="relative w-full">
+                     
+                        <button 
+                            class="
+                                shadow
+                                bg-cyan-500
+                                #06B6D4
+                                hover:bg-cyan-400
+                                focus:shadow-outline focus:outline-none
+                                text-white
+                                font-bold
+                                py-2
+                                px-4
+                                w-full
+                                rounded
+                                disabled:bg-blue-400
+                            "
+                            id="speakBtn"
+                        >
+                            Speak
+                        </button>
+                      
+                      <div id='ping'class="hidden absolute top-0 right-0 -mr-1 -mt-1 w-4 h-4 rounded-full bg-[#ff4500] animate-ping"></div>
+                      <div class="absolute top-0 right-0 -mr-1 -mt-1 w-4 h-4 rounded-full bg-[#ff4500]"></div>
+                    </div>
+                </div>          
+        </div>
+    </div>
+<script src="script.js" type="module"></script>
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/translate@1/translate.min.js"></script>
+</body>
+</html>
